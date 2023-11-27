@@ -97,6 +97,7 @@ ErrorCode _recGuess(TreeNode* node)
         case 'y':
         case 'Y':
             PRINT_SAY("As I said!");
+            putchar('\n');
             return EVERYTHING_FINE;
         case 'n':
         case 'N':

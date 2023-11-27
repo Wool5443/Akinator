@@ -5,12 +5,7 @@ int main()
 {
     Tree akinator = {};
 
-    akinator.Read("data.txt");
-
-    TreeNodeResult rootRes = TreeNode::New("Unknown", nullptr, nullptr);
-    MyAssertSoft(!rootRes.error, rootRes.error);
-
-    akinator.Init(rootRes.value);
+    akinator.Read(AKINATOR_DATA);
 
     ErrorCode guessError = EVERYTHING_FINE;
 
@@ -27,7 +22,7 @@ int main()
 
     akinator.Dump();
 
-    // akinator.Print("data.txt");
+    akinator.Print(AKINATOR_DATA);
 
     akinator.Destructor();
 
