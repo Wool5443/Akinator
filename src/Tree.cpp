@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "Tree.hpp"
 #include "OneginFunctions.hpp"
 #include "MinMax.hpp"
@@ -628,10 +629,18 @@ static TreeNodeResult _recReadOpenBracket(Text* input, const char* openBracket, 
     const String* token = &input->tokens[(*tokenNum)++];
     ((char*)(token->text))[token->length] = '\0';
 
-    TreeElement_t value = (TreeElement_t)calloc(token->length + 1, 1);
+    const char* valueStart = token->text;
+    while (isspace(*valueStart))
+        valueStart++;
+    const char* valueEnd = token->text + token->length - 1;
+    while (isspace(*valueEnd))
+        valueEnd--;
+
+    size_t valueSize = valueEnd - valueStart + 2;
+    TreeElement_t value = (TreeElement_t)calloc(valueSize, 1);
     if (!value)
         return { nullptr, ERROR_NO_MEMORY };
-    strcpy((char*)value, token->text);
+    strncpy((char*)value, valueStart, valueSize - 1);
     
     TreeNodeResult leftRes = _recRead(input, tokenNum);
     RETURN_ERROR_RESULT(leftRes, nullptr);
