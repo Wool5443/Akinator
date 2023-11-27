@@ -104,19 +104,6 @@ ErrorCode TreeNode::Delete()
 
     this->id = BAD_ID;
 
-    if (this->left)
-    {
-        if (this->left->parent != this)
-            return ERROR_TREE_LOOP;
-        RETURN_ERROR(this->left->Delete());
-    }
-    if (this->right)
-    {
-        if (this->right->parent != this)
-            return ERROR_TREE_LOOP;
-        RETURN_ERROR(this->right->Delete());
-    }
-
     if (this->parent)
     {
         if (this->parent->left == this)
@@ -135,11 +122,25 @@ ErrorCode TreeNode::Delete()
         #endif
     }
 
+    if (this->left)
+    {
+        if (this->left->parent != this)
+            return ERROR_TREE_LOOP;
+        RETURN_ERROR(this->left->Delete());
+    }
+    if (this->right)
+    {
+        if (this->right->parent != this)
+            return ERROR_TREE_LOOP;
+        RETURN_ERROR(this->right->Delete());
+    }
+
     if (this->value != TREE_POISON)
     {
         free((void*)this->value);
-        this->value  = TREE_POISON;
+        this->value = TREE_POISON;
     }
+
     this->left   = nullptr;
     this->right  = nullptr;
     this->parent = nullptr;
@@ -163,7 +164,7 @@ TreeNodeResult TreeNode::Copy()
     return _recCopy(this);
 }
 
-ErrorCode TreeNode::AddLeft(TreeNode* left)
+ErrorCode TreeNode::SetLeft(TreeNode* left)
 {
     MyAssertSoft(left, ERROR_NULLPTR);
 
@@ -180,7 +181,7 @@ ErrorCode TreeNode::AddLeft(TreeNode* left)
 
     return EVERYTHING_FINE;
 }
-ErrorCode TreeNode::AddRight(TreeNode* right)
+ErrorCode TreeNode::SetRight(TreeNode* right)
 {
     MyAssertSoft(right, ERROR_NULLPTR);
 
@@ -295,7 +296,7 @@ ErrorCode Tree::Destructor()
     #ifdef SIZE_VERIFICATION
     this->size = nullptr;
     #endif
-
+    
     return EVERYTHING_FINE;
 }
 
@@ -472,8 +473,10 @@ ErrorCode Tree::Dump()
     MAX_DEPTH = min(*this->size, MAX_TREE_SIZE);
     #endif
 
-    RETURN_ERROR(_recBuildCellTemplatesGraph(this->root->left,  outGraphFile, 0, MAX_DEPTH));
-    RETURN_ERROR(_recBuildCellTemplatesGraph(this->root->right, outGraphFile, 0, MAX_DEPTH));
+    if (this->root->left)
+        RETURN_ERROR(_recBuildCellTemplatesGraph(this->root->left,  outGraphFile, 0, MAX_DEPTH));
+    if (this->root->right)
+        RETURN_ERROR(_recBuildCellTemplatesGraph(this->root->right, outGraphFile, 0, MAX_DEPTH));
 
     RETURN_ERROR(_recDrawGraph(this->root, outGraphFile, 0, MAX_DEPTH));
     fprintf(outGraphFile, "\n");
