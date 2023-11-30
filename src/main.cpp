@@ -7,11 +7,15 @@ int main()
 
     akinator.Read(AKINATOR_DATA);
 
-    RETURN_ERROR(Play(&akinator));
+    akinator.Dump();
+
+    ErrorCode playError = Play(&akinator);
+    if (playError != EVERYTHING_FINE && playError != EXIT)
+        return playError;
 
     akinator.Dump();
 
-    akinator.Print(AKINATOR_DATA);
+    // akinator.Print(AKINATOR_DATA);
 
     akinator.Destructor();
 

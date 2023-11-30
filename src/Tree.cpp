@@ -5,9 +5,6 @@
 #include "OneginFunctions.hpp"
 #include "MinMax.hpp"
 
-
-static const size_t BAD_ID = 0;
-
 static const size_t MAX_PATH_LENGTH = 128;
 static const size_t MAX_COMMAND_LENGTH = 256;
 

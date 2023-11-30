@@ -13,6 +13,8 @@ static const char* DOT_FOLDER = "log/dot";
 static const char* IMG_FOLDER = "log/img";
 static const char* HTML_FILE_PATH = "log.html";
 
+static const size_t BAD_ID = 0;
+
 struct TreeNodeResult;
 /** @struct TreeNode
  * @brief A binary tree node containing value and ptrs to children
