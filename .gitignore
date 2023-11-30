@@ -2,5 +2,6 @@
 *.png
 *.json
 *.dot
+*.html
 main
 data.txt
