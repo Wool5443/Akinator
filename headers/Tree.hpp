@@ -120,6 +120,13 @@ struct Tree
     ErrorCode Init(TreeNode* root);
 
     /**
+     * @brief Initializes a tree with an empty root
+     * 
+     * @return ErrorCode 
+     */
+    ErrorCode Init();
+
+    /**
      * @brief Destroys the tree
      * 
      * @return Error
