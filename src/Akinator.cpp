@@ -274,18 +274,14 @@ ErrorCode _compare(Tree* dataTree)
     RETURN_ERROR(stackRes1.error);
     Stack* stack1 = stackRes1.value;
     
-    dataTree->Dump();
     TreeNodeResult nodeRes1 = _recFindNode(dataTree->root, stack1, obj1);
-    dataTree->Dump();
     RETURN_ERROR(nodeRes1.error);
 
     StackResult stackRes2 = StackInit();
     RETURN_ERROR(stackRes2.error);
     Stack* stack2 = stackRes2.value;
 
-    dataTree->Dump();
     TreeNodeResult nodeRes2 = _recFindNode(dataTree->root, stack2, obj2);
-    dataTree->Dump();
     RETURN_ERROR(nodeRes2.error);
 
     StackElementResult obj1Pop = Pop(stack1);
