@@ -157,10 +157,10 @@ ErrorCode Play(Tree* dataTree)
         case EOF:
             return _exitMenu(dataTree);
         default:
-            userAnswer = _retryInput("g, q");
+            userAnswer = _retryInput("g, c, d, q");
             break;
         }
-        PRINT_SAY("What do you want to do next? g, c, d, q\n");
+        PRINT_SAY("What do you want to do next? g, c, d, q.\n");
         if (scanf("%c", &userAnswer) != 1)
             return EXIT;
         ClearBuffer(stdin);
