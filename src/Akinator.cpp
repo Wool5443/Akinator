@@ -116,7 +116,10 @@ TreeNodeResult _recFindNode(TreeNode* node, Stack* stack, const char* obj);
 
 ErrorCode _pushPath(Stack* stack, TreeNode* node);
 
+ErrorCode _exitMenu(Tree* dataTree);
+
 char _retryInput(const char* options);
+
 
 ErrorCode Play(Tree* dataTree)
 {
@@ -151,12 +154,13 @@ ErrorCode Play(Tree* dataTree)
             break;
         case 'q':
         case 'Q':
-            return EXIT;
+        case EOF:
+            return _exitMenu(dataTree);
         default:
             userAnswer = _retryInput("g, q");
             break;
         }
-        PRINT_SAY("What do you want to do next?\n");
+        PRINT_SAY("What do you want to do next? g, c, d, q\n");
         if (scanf("%c", &userAnswer) != 1)
             return EXIT;
         ClearBuffer(stdin);
@@ -491,6 +495,19 @@ ErrorCode _pushPath(Stack* stack, TreeNode* node)
     }
 
     return EVERYTHING_FINE;
+}
+
+ErrorCode _exitMenu(Tree* dataTree)
+{
+    PRINT_SAY("Do you want to save data?\n");
+    char userAnswer = '\0';
+    if (scanf("%c", &userAnswer) != 1)
+        return EXIT;
+    ClearBuffer(stdin);
+
+    if (userAnswer == 'y' || userAnswer == 'Y')
+        return dataTree->Print(AKINATOR_DATA);
+    return EXIT;
 }
 
 char _retryInput(const char* options)

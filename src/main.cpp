@@ -13,8 +13,6 @@ int main()
     if (playError != EVERYTHING_FINE && playError != EXIT)
         return playError;
 
-    akinator.Print("garbage.txt");
-
     akinator.Destructor();
 
     Tree::EndHtmlLogging();
