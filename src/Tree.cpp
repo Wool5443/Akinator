@@ -5,6 +5,8 @@
 #include "OneginFunctions.hpp"
 #include "MinMax.hpp"
 
+static size_t CURRENT_ID = 1;
+
 static const size_t MAX_PATH_LENGTH = 128;
 static const size_t MAX_COMMAND_LENGTH = 256;
 
@@ -58,8 +60,6 @@ do                                                      \
 
 TreeNodeResult TreeNode::New(TreeElement_t value, TreeNode* left, TreeNode* right)
 {
-    static size_t CURRENT_ID = 1;
-
     TreeNode* node = (TreeNode*)calloc(1, sizeof(TreeNode));
     if (!node)
         return { NULL, ERROR_NO_MEMORY };
@@ -500,6 +500,11 @@ static ErrorCode _recBuildCellTemplatesGraph(TreeNode* node, FILE* outGraphFile,
 {
     MyAssertSoft(node, ERROR_NULLPTR);
 
+    size_t nodeId = node->id;
+    
+    if (node->id == 0)
+        node->id = CURRENT_ID++;
+
     if (curDepth > maxDepth)
         return EVERYTHING_FINE;
 
@@ -509,6 +514,7 @@ static ErrorCode _recBuildCellTemplatesGraph(TreeNode* node, FILE* outGraphFile,
         fprintf(outGraphFile, "POISON");
     else
         fprintf(outGraphFile, TREE_ELEMENT_SPECIFIER, node->value);
+    fprintf(outGraphFile, "|id:\\n%zu", nodeId);
 
     #ifdef SIZE_VERIFICATION
     fprintf(outGraphFile, "|node count:\\n%zu", node->nodeCount);

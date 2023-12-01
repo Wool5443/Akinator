@@ -260,6 +260,8 @@ ErrorCode _compare(Tree* dataTree)
     char obj2[MAX_STRING_LENGTH] = "";
     fgets(obj2, MAX_STRING_LENGTH, stdin);
 
+    putchar('\n');
+
     // Deleting \n in the end.
     obj1[strlen(obj1) - 1] = '\0';
     obj2[strlen(obj2) - 1] = '\0';
@@ -344,6 +346,8 @@ ErrorCode _describe(Tree* dataTree)
     PRINT_SAY("What object do you want me to describe?\n");
     char obj[MAX_STRING_LENGTH] = "";
     fgets(obj, MAX_STRING_LENGTH, stdin);
+
+    putchar('\n');
 
     obj[strlen(obj) - 1] = '\0';
 
