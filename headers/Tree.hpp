@@ -6,15 +6,6 @@
 #include "Utils.hpp"
 #include "TreeSettings.ini"
 
-/**
- * @brief Log folders
- */
-static const char* DOT_FOLDER = "log/dot";
-static const char* IMG_FOLDER = "log/img";
-static const char* HTML_FILE_PATH = "log.html";
-
-static const size_t BAD_ID = 0;
-
 struct TreeNodeResult;
 /** @struct TreeNode
  * @brief A binary tree node containing value and ptrs to children
@@ -42,9 +33,9 @@ struct TreeNode
     /**
      * @brief Returns a new node result
      * 
-     * @param value - value
-     * @param left - left child
-     * @param right - right child
+     * @param [in] value - value
+     * @param [in] left - left child
+     * @param [in] right - right child
      * @return TreeNodeResult - new node
      */
     static TreeNodeResult New(TreeElement_t value, TreeNode* left, TreeNode* right);
@@ -66,7 +57,7 @@ struct TreeNode
     /**
      * @brief Sets the left node.
      * 
-     * @param left - the left node.
+     * @param [in] left - the left node.
      * @return Error
      */
     ErrorCode SetLeft(TreeNode* left);
@@ -74,7 +65,7 @@ struct TreeNode
     /**
      * @brief Sets the right node.
      * 
-     * @param right - the right node.
+     * @param [in] right - the right node.
      * @return Error
      */
     ErrorCode SetRight(TreeNode* right);
@@ -114,7 +105,7 @@ struct Tree
     /**
      * @brief Initializes a tree with a root node
      * 
-     * @param root
+     * @param [in] root
      * @return Error
      */
     ErrorCode Init(TreeNode* root);
@@ -169,7 +160,7 @@ struct Tree
     /**
      * @brief Saves the tree in pre-order
      * 
-     * @param outPath - where to save
+     * @param [in] outPath - where to save
      * @return Error
      */
     ErrorCode Print(const char* outPath);
@@ -179,7 +170,7 @@ struct Tree
      * 
      * @attention Make sure to delete the tree before reading into it
      * 
-     * @param readPath - what to read
+     * @param [in] readPath - what to read
      * @return Error
      */
     ErrorCode Read(const char* readPath);
