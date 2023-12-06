@@ -312,8 +312,6 @@ ErrorCode _compare(Tree* dataTree)
         }
     }
 
-    PRINT_SAY("But...\n");
-
     if (!obj1Pop.error)
     {
         TreeNode* curNode1 = curNode;

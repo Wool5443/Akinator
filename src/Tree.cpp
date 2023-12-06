@@ -5,8 +5,6 @@
 #include "OneginFunctions.hpp"
 #include "MinMax.hpp"
 
-static size_t CURRENT_ID = 1;
-
 static const size_t MAX_PATH_LENGTH = 128;
 static const size_t MAX_COMMAND_LENGTH = 256;
 
@@ -31,10 +29,10 @@ static ErrorCode _recDrawGraph(TreeNode* node, FILE* outGraphFile, size_t curDep
 
 static ErrorCode _recPrint(TreeNode* node, FILE* outFile);
 
-static TreeNodeResult _recRead(Text* input, size_t* tokenNum);
+static TreeNodeResult _recRead(Text* input, size_t* wordNum);
 
 static TreeNodeResult _recReadOpenBracket(Text* input, const char* openBracket,
-                                          size_t* tokenNum);
+                                          size_t* wordNum);
 
 #define ERR_DUMP_RET(tree)                              \
 do                                                      \
@@ -60,6 +58,8 @@ do                                                      \
 
 TreeNodeResult TreeNode::New(TreeElement_t value, TreeNode* left, TreeNode* right)
 {
+    static size_t CURRENT_ID = 1;
+
     TreeNode* node = (TreeNode*)calloc(1, sizeof(TreeNode));
     if (!node)
         return { NULL, ERROR_NO_MEMORY };
@@ -470,8 +470,8 @@ ErrorCode Tree::Dump()
                           #endif
                           );
 
-    fprintf(outGraphFile, "NODE_%zu[style = \"filled\", fillcolor = " NODE_COLOR ", ",
-                           this->root->id);
+    fprintf(outGraphFile, "\nNODE_%p[style = \"filled\", fillcolor = " NODE_COLOR ", ",
+                           this->root);
     if (this->root->value == TREE_POISON)
         fprintf(outGraphFile, "label = \"{Value:\\nPOISON|{<left>Left|<right>Right}}\"];\n");
     else
@@ -491,7 +491,7 @@ ErrorCode Tree::Dump()
 
     RETURN_ERROR(_recDrawGraph(this->root, outGraphFile, 0, MAX_DEPTH));
     fprintf(outGraphFile, "\n");
-    fprintf(outGraphFile, "TREE:root->NODE_%zu\n", this->root->id);
+    fprintf(outGraphFile, "TREE:root->NODE_%p\n", this->root);
 
     fprintf(outGraphFile, "}\n");
     fclose(outGraphFile);
@@ -515,19 +515,21 @@ static ErrorCode _recBuildCellTemplatesGraph(TreeNode* node, FILE* outGraphFile,
 
     size_t nodeId = node->id;
     
-    if (node->id == 0)
-        node->id = CURRENT_ID++;
-
     if (curDepth > maxDepth)
         return EVERYTHING_FINE;
 
-    fprintf(outGraphFile, "NODE_%zu[style = \"filled\", fillcolor = " NODE_COLOR ", ", node->id);
+    fprintf(outGraphFile, "NODE_%p[style = \"filled\", fillcolor = " NODE_COLOR ", ", node);
     fprintf(outGraphFile, "label = \"{Value:\\n");
     if (node->value == TREE_POISON)
         fprintf(outGraphFile, "POISON");
     else
         fprintf(outGraphFile, TREE_ELEMENT_SPECIFIER, node->value);
-    fprintf(outGraphFile, "|id:\\n%zu", nodeId);
+    fprintf(outGraphFile, "|id:\\n");
+
+    if (node->id == BAD_ID)
+        fprintf(outGraphFile, "BAD_ID");
+    else
+        fprintf(outGraphFile, "%zu", node->id);
 
     #ifdef SIZE_VERIFICATION
     fprintf(outGraphFile, "|node count:\\n%zu", node->nodeCount);
@@ -558,12 +560,12 @@ static ErrorCode _recDrawGraph(TreeNode* node, FILE* outGraphFile, size_t curDep
 
     if (node->left)
     {
-        fprintf(outGraphFile, "NODE_%zu:left->NODE_%zu;\n", node->id, node->left->id);
+        fprintf(outGraphFile, "NODE_%p:left->NODE_%p;\n", node, node->left);
         RETURN_ERROR(_recDrawGraph(node->left, outGraphFile, curDepth + 1, maxDepth));
     }
     if (node->right)
     {
-        fprintf(outGraphFile, "NODE_%zu:right->NODE_%zu;\n", node->id, node->right->id);
+        fprintf(outGraphFile, "NODE_%p:right->NODE_%p;\n", node, node->right);
         RETURN_ERROR(_recDrawGraph(node->right, outGraphFile, curDepth + 1, maxDepth));
     }
     return EVERYTHING_FINE;
@@ -588,14 +590,14 @@ static ErrorCode _recPrint(TreeNode* node, FILE* outFile)
 {
     if (!node)
     {
-        fprintf(outFile, "nil%c", TREE_TOKEN_SEPARATOR);
+        fprintf(outFile, "nil%c", TREE_WORD_SEPARATOR);
         return EVERYTHING_FINE;
     }
 
-    fprintf(outFile, "(%c" TREE_ELEMENT_SPECIFIER "%c", TREE_TOKEN_SEPARATOR, node->value, TREE_TOKEN_SEPARATOR);
+    fprintf(outFile, "(%c" TREE_ELEMENT_SPECIFIER "%c", TREE_WORD_SEPARATOR, node->value, TREE_WORD_SEPARATOR);
     RETURN_ERROR(_recPrint(node->left, outFile));
     RETURN_ERROR(_recPrint(node->right, outFile));
-    fprintf(outFile, ")%c", TREE_TOKEN_SEPARATOR);
+    fprintf(outFile, ")%c", TREE_WORD_SEPARATOR);
 
     return EVERYTHING_FINE;
 }
@@ -604,11 +606,11 @@ ErrorCode Tree::Read(const char* readPath)
 {
     MyAssertSoft(readPath, ERROR_NULLPTR);
 
-    Text input = CreateText(readPath, TREE_TOKEN_SEPARATOR);
+    Text input = CreateText(readPath, TREE_WORD_SEPARATOR);
 
-    size_t tokenNum = 0;
+    size_t wordNum = 0;
 
-    TreeNodeResult rootRes = _recRead(&input, &tokenNum);
+    TreeNodeResult rootRes = _recRead(&input, &wordNum);
     DestroyText(&input);
 
     RETURN_ERROR(rootRes.error);
@@ -616,39 +618,39 @@ ErrorCode Tree::Read(const char* readPath)
     return this->Init(rootRes.value);
 }
 
-static TreeNodeResult _recRead(Text* input, size_t* tokenNum)
+static TreeNodeResult _recRead(Text* input, size_t* wordNum)
 {
-    MyAssertSoftResult(*tokenNum < input->numberOfTokens, NULL, ERROR_INDEX_OUT_OF_BOUNDS);
+    MyAssertSoftResult(*wordNum < input->numberOfWords, NULL, ERROR_INDEX_OUT_OF_BOUNDS);
 
-    const String* token = &input->tokens[(*tokenNum)++];
-    ((char*)(token->text))[token->length] = '\0';
+    const String* string = &input->words[(*wordNum)++];
+    ((char*)(string->text))[string->length] = '\0';
 
-    const char* openBracket = strchr(token->text, '(');
+    const char* openBracket = strchr(string->text, '(');
     if (openBracket)
     {
-        if (!StringIsEmptyChars(token->text, '('))
+        if (!StringIsEmptyChars(string->text, '('))
             return { nullptr, ERROR_SYNTAX };
-        return _recReadOpenBracket(input, openBracket, tokenNum);
+        return _recReadOpenBracket(input, openBracket, wordNum);
     }
 
-    const char* nil = strstr(token->text, "nil");
+    const char* nil = strstr(string->text, "nil");
     if (nil)
         return { nullptr, EVERYTHING_FINE };
     return { nullptr, ERROR_SYNTAX };
 }
 
-static TreeNodeResult _recReadOpenBracket(Text* input, const char* openBracket, size_t* tokenNum)
+static TreeNodeResult _recReadOpenBracket(Text* input, const char* openBracket, size_t* wordNum)
 {
     if (!StringIsEmptyChars(openBracket + 1, '\0'))
         return { nullptr, ERROR_SYNTAX };
 
-    const String* token = &input->tokens[(*tokenNum)++];
-    ((char*)(token->text))[token->length] = '\0';
+    const String* string = &input->words[(*wordNum)++];
+    ((char*)(string->text))[string->length] = '\0';
 
-    const char* valueStart = token->text;
+    const char* valueStart = string->text;
     while (isspace(*valueStart))
         valueStart++;
-    const char* valueEnd = token->text + token->length - 1;
+    const char* valueEnd = string->text + string->length - 1;
     while (isspace(*valueEnd))
         valueEnd--;
 
@@ -658,24 +660,30 @@ static TreeNodeResult _recReadOpenBracket(Text* input, const char* openBracket, 
         return { nullptr, ERROR_NO_MEMORY };
     strncpy((char*)value, valueStart, valueSize - 1);
     
-    TreeNodeResult leftRes = _recRead(input, tokenNum);
+    TreeNodeResult leftRes = _recRead(input, wordNum);
     RETURN_ERROR_RESULT(leftRes, nullptr);
 
-    TreeNodeResult rightRes = _recRead(input, tokenNum);
+    TreeNodeResult rightRes = _recRead(input, wordNum);
     RETURN_ERROR_RESULT(rightRes, nullptr);
 
     TreeNodeResult nodeRes = TreeNode::New(value, leftRes.value, rightRes.value);
     RETURN_ERROR_RESULT(nodeRes, nullptr);
 
-    token = &input->tokens[(*tokenNum)++];
-    ((char*)(token->text))[token->length] = '\0';
+    string = &input->words[(*wordNum)++];
+    ((char*)(string->text))[string->length] = '\0';
 
-    const char* closeBracket = strchr(token->text, ')');
+    const char* closeBracket = strchr(string->text, ')');
     if (!closeBracket)
         return { nullptr, ERROR_SYNTAX };
     
     return nodeRes;
 }
+
+struct StringResult
+{
+    const char* value;
+    ErrorCode error;
+};
 
 ErrorCode Tree::StartHtmlLogging()
 {
