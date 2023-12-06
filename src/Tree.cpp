@@ -712,6 +712,5 @@ ErrorCode Tree::EndHtmlLogging()
     }
     HTML_FILE = NULL;
 
-
     return EVERYTHING_FINE;
 }
