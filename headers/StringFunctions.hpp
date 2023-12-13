@@ -11,11 +11,13 @@
  * 
  * @var String::text - data.
  * @var String::length - length of the string.
+ * @var String::toFree - whether to free the string.
 */
 struct String
 {
     const char* text;
     size_t length;
+    bool toFree;
 };
 
 /** @enum StringCompareMethod
